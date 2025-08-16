@@ -70,6 +70,26 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.wowdevai.dev/tips-tricks/custom-domain#step-by-step-guide)
 
+🧩 How They All Work Together
+
+Docker gives you Postgres running locally.
+
+Prisma schema defines your models (User, Product, Faq).
+
+Migrations apply schema changes to the database.
+
+Seeding fills the DB with test/demo data.
+
+Your frontend (Next.js) can now fetch data via APIs that talk to Prisma, which talks to Postgres.
+
+So when you ran all those commands, you basically:
+
+Brought up a database (docker compose up).
+
+Told Prisma to sync schema with DB (prisma migrate dev).
+
+Inserted starter data (npm run db:seed).
+
 To get started:
 
 # Install dependencies
@@ -82,6 +102,7 @@ docker-compose up -d
 docker exec -e PGPASSWORD=postgres -it gearhub-postgres psql -U postgres -d gearhub -c "select 'connected' as status;"
 
 # Run migrations and seed data
+npx prisma generate 
 npm run db:migrate
 npm run db:seed
 

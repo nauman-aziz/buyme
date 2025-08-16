@@ -313,36 +313,33 @@ async function main() {
   ]
 
   for (const productData of products) {
-    const { images, variants, ...productInfo } = productData
-    
-    const product = await prisma.product.create({
-      data: {
-        ...productInfo,
-        images: {
-          create: images
-        }
-      }
+  const { images, variants, ...productInfo } = productData
+
+  const product = await prisma.product.upsert({
+    where: { slug: productInfo.slug },
+    update: {},
+    create: {
+      ...productInfo,
+      images: { create: images }
+    }
+  })
+
+  for (const variantData of variants) {
+    const { inventory, ...variantInfo } = variantData
+    const variant = await prisma.variant.upsert({
+      where: { sku: variantInfo.sku },
+      update: {},
+      create: { ...variantInfo, productId: product.id }
     })
 
-    // Create variants and inventory
-    for (const variantData of variants) {
-      const { inventory, ...variantInfo } = variantData
-      
-      const variant = await prisma.variant.create({
-        data: {
-          ...variantInfo,
-          productId: product.id
-        }
-      })
-
-      await prisma.inventory.create({
-        data: {
-          ...inventory,
-          variantId: variant.id
-        }
-      })
-    }
+    await prisma.inventory.upsert({
+      where: { variantId: variant.id },
+      update: {},
+      create: { ...inventory, variantId: variant.id }
+    })
   }
+}
+
 
   // Create coupons
   const coupons = [
